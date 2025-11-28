@@ -1,13 +1,17 @@
 import { useForm } from 'react-hook-form';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import SearchableCategoryDropdown from './SearchableCategoryDropdown';
 
-function TransactionForm({ categories, onSubmit, isDeleting, isSaving, transaction, onDelete }) {
+function TransactionForm({ categories, onSubmit, isDeleting, isSaving, transaction, onDelete, onCreateCategory, isCreatingCategory }) {
     // form field controll
-    const { register, handleSubmit, watch, reset, formState } = useForm();
+    const { register, handleSubmit, watch, reset, formState, setValue, clearErrors } = useForm();
     const date = useRef({});
     date.current = watch('date');
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    
+    // Track selected category for the searchable dropdown
+    const [selectedCategoryId, setSelectedCategoryId] = useState('');
 
     useEffect(() => {
         if (transaction && transaction.transactionId) {
@@ -16,9 +20,21 @@ function TransactionForm({ categories, onSubmit, isDeleting, isSaving, transacti
                 description: transaction.description,
                 amount: transaction.amount,
                 date: transaction.date.split('T')[0]
-            })
+            });
+            setSelectedCategoryId(String(transaction.categoryId));
         }
     }, [reset, transaction])
+
+    // Register the category field for validation
+    useEffect(() => {
+        register('category', { required: "Category is required" });
+    }, [register]);
+
+    const handleCategoryChange = (categoryId) => {
+        setSelectedCategoryId(categoryId);
+        setValue('category', categoryId);
+        clearErrors('category');
+    };
 
     const deleteTransaction = (e, id) => {
         e.preventDefault()
@@ -38,27 +54,14 @@ function TransactionForm({ categories, onSubmit, isDeleting, isSaving, transacti
 
                 {/* input category */}
                 <label>Transaction Category</label><br />
-                <div className='radio'>
-
-                    {
-                        categories.filter(cat => cat.enabled).map((cat) => {
-                            return (
-                                <span key={cat.categoryId}>
-                                    <input
-                                        type='radio'
-                                        id={cat.categoryName}
-                                        value={cat.categoryId}
-                                        {...register('category', {
-                                            required: "category is required"
-                                        })}
-                                    /><label for={cat.categoryName}>{cat.categoryName}</label>
-                                </span>
-                            )
-                        })
-                    }
-
-                </div>
-                {formState.errors.category && <small>{formState.errors.category.message}</small>}
+                <SearchableCategoryDropdown
+                    categories={categories}
+                    selectedCategoryId={selectedCategoryId}
+                    onChange={handleCategoryChange}
+                    onCreateCategory={onCreateCategory}
+                    isCreating={isCreatingCategory}
+                    error={formState.errors.category?.message}
+                />
             </div>
 
             {/* input description */}

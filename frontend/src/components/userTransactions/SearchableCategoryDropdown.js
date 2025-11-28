@@ -97,9 +97,20 @@ function SearchableCategoryDropdown({
         setHighlightedIndex(-1);
     };
 
+    // Escape special regex characters to prevent ReDoS attacks
+    const escapeRegex = (string) => {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    };
+
+    // Validate category name (max 30 chars as per backend validation)
+    const isValidCategoryName = (name) => {
+        return name && name.trim().length > 0 && name.trim().length <= 30;
+    };
+
     const handleCreate = () => {
-        if (searchText.trim() && !isCreating) {
-            onCreateCategory(searchText.trim());
+        const trimmedName = searchText.trim();
+        if (trimmedName && !isCreating && isValidCategoryName(trimmedName)) {
+            onCreateCategory(trimmedName);
         }
     };
 
@@ -119,7 +130,8 @@ function SearchableCategoryDropdown({
     const highlightMatch = (text) => {
         if (!searchText.trim()) return text;
         
-        const regex = new RegExp(`(${searchText.trim()})`, 'gi');
+        const escapedSearch = escapeRegex(searchText.trim());
+        const regex = new RegExp(`(${escapedSearch})`, 'gi');
         const parts = text.split(regex);
         
         return parts.map((part, index) => 
@@ -129,7 +141,7 @@ function SearchableCategoryDropdown({
         );
     };
 
-    const showCreateOption = searchText.trim() && !exactMatch;
+    const showCreateOption = searchText.trim() && !exactMatch && isValidCategoryName(searchText);
 
     return (
         <div className="searchable-dropdown" ref={dropdownRef}>

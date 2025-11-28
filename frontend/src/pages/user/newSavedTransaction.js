@@ -35,8 +35,9 @@ function NewSavedTransaction() {
                         :
                         toast.error("Failed to fetch categories: Try again later!");
                 }
-            );
-            setIsFetching(false);
+            ).finally(() => {
+                setIsFetching(false);
+            });
         };
         fetchCategories();
     }, []);

@@ -32,7 +32,7 @@ public class CategoryController {
     }
 
     @PostMapping("/new")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<ApiResponseDto<?>> addNewCategory(@RequestBody @Valid CategoryRequestDto categoryRequestDto)
             throws CategoryServiceLogicException, TransactionTypeNotFoundException, CategoryAlreadyExistsException {
         return categoryService.addNewCategory(categoryRequestDto);

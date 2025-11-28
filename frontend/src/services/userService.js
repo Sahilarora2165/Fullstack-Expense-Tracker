@@ -303,6 +303,19 @@ const skipSavedTransaction = (id) => {
     )
 }
 
+const create_category = (categoryName, transactionTypeId) => {
+    return axios.post(
+        API_BASE_URL + '/category/new',
+        {
+            categoryName: categoryName,
+            transactionTypeId: transactionTypeId
+        },
+        {
+            headers: AuthService.authHeader()
+        }
+    )
+}
+
 const UserService = {
     get_categories,
     add_transaction ,
@@ -326,6 +339,7 @@ const UserService = {
     updateSavedTransaction,
     deleteSavedTransaction,
     addSavedTransaction,
-    skipSavedTransaction
+    skipSavedTransaction,
+    create_category
 }
 export default UserService;
